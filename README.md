@@ -1,10 +1,10 @@
 ## pls follow the instructions below
 
-####clone the project into your apache directory
+#### clone the project into your apache directory
 
 `composer install`
 
-######needs only for twig, twig - cuz i luv it ;)
+###### needs only for twig, twig - cuz i luv it ;)
 
 
 #### enter mysql bash:
