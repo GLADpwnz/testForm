@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Example for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="assets/css/jquery.datetimepicker.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="assets/css/main.css" rel="stylesheet">
+  </head>
+
+  <body class="bg-light">
+
+    <div class="container">
+      <div class="py-5 text-center">
+        <h2>Заявка на тестирование</h2>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <form id="testForm" class="needs-validation" novalidate>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="lastName">Фамилия</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="" value="" required>
+                <div class="invalid-feedback">Поле обязательно для заполнения</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="firstName">Имя</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="" value="" required>
+                <div class="invalid-feedback">Поле обязательно для заполнения</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="middleName">Отчество</label>
+                <input type="text" class="form-control" id="middleName" name="middleName" placeholder="" value="" required>
+                <div class="invalid-feedback">Поле обязательно для заполнения</div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="sex">Пол</label>
+                <select class="custom-select d-block w-100" id="sex" name="sex" required>
+                  <option value="">выберите...</option>
+                  <option value="man">Мужской</option>
+                  <option value="woman">Женский</option>
+                </select>
+                <div class="invalid-feedback">Выберите значение из списка</div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="bday">Дата рождения</label>
+                <input type="text" class="form-control" id="bday" name="bday" placeholder="" required>
+                <div class="invalid-feedback">Введите дату</div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="weight">Вес</label>
+                <input type="number" class="form-control" id="weight" name="weight" placeholder="" required>
+                <div class="invalid-feedback">Введите число</div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="height">Рост</label>
+                <input type="number" class="form-control" id="height" name="height" placeholder="" required>
+                <div class="invalid-feedback">Введите число</div>
+              </div>
+            </div>
+
+            <hr class="mb-4">
+            <button class="col-sm-4 ml-auto mr-auto btn btn-primary btn-lg btn-block" type="submit">Отправить</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="testModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div id="pdfData">
+              <div class="modal-header">
+                <h5 class="modal-title">Результат заявки</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="saveModal" class="btn btn-primary">Сохранить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="my-5 pt-5 text-muted text-center text-small">
+        <p class="mb-1">&copy; 2019-2020 Company Name</p>
+      </footer>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery-3.4.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.datetimepicker.full.min.js"></script>
+    <script src="assets/js/html2canvas.min.js"></script>
+    <script src="assets/js/jspdf.min.js"></script>
+
+    <script>
+      (function($){
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        let forms = document.getElementsByClassName('needs-validation');
+
+        // Loop over them and prevent submission
+        let validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (form.checkValidity() === false) {
+              event.stopPropagation();
+            } else {
+              if (form.id === 'testForm') {
+                let modal = $('#testModal');
+                $.ajax({
+                  type: "POST",
+                  url: "testResponse.php",
+                  data: $(form).serialize(),
+                  success: function (response) {
+                    modal.find('.modal-body').append(response);
+                    modal.modal('show');
+
+                    setTimeout(function(){
+                      modal.modal('hide');
+                      modal.find('.modal-body').empty();
+                    }, 20000);
+                  },
+                  error: function (response) {
+                    alert('Произошла ошибка');
+                  }
+                });
+              }
+              // here u can use success validation for another forms
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+
+        $.datetimepicker.setLocale('ru');
+        $('#bday').datetimepicker({
+          timepicker: false,
+          format: 'Y.m.d',
+        });
+
+        $('#saveModal').click(function () {
+          html2canvas(document.querySelector('#pdfData')).then(canvas => {
+            let pdf = new jsPDF('p', 'mm', 'a4');
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 300);
+            pdf.save('result-test.pdf');
+          });
+        });
+
+        })(window.jQuery);
+    </script>
+  </body>
+</html>
